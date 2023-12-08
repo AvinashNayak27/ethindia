@@ -1,6 +1,7 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { ethers } from "ethers";
 import CryptoJS from "crypto-js";
+import lighthouse from "@lighthouse-web3/sdk";
 
 const ImageDrop = () => {
   const [image, setImage] = useState(null);
@@ -8,6 +9,7 @@ const ImageDrop = () => {
   const [imageHash, setImageHash] = useState("");
   const [signature, setSignature] = useState("");
   const [account, setAccount] = useState("");
+  const [uploadStatus, setUploadStatus] = useState("");
 
   const onDrop = useCallback((event) => {
     event.preventDefault();
@@ -27,6 +29,8 @@ const ImageDrop = () => {
         setImage(e.target.result);
         const hash = computeHash(e.target.result);
         setImageHash(hash);
+        console.log("file:", file);
+        uploadToLighthouse(file); // Upload to Lighthouse
       };
       reader.readAsDataURL(file);
     }
@@ -36,7 +40,7 @@ const ImageDrop = () => {
     const base64 = dataUrl.split(",")[1];
     const wordArray = CryptoJS.enc.Base64.parse(base64);
     const hash = CryptoJS.SHA256(wordArray).toString(CryptoJS.enc.Hex);
-    return hash;
+    return "0x" + hash;
   };
 
   const connectWallet = async () => {
@@ -67,9 +71,8 @@ const ImageDrop = () => {
     try {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-      const imagehashid = ethers.utils.id(imageHash);
       const signature = await signer.signMessage(
-        ethers.utils.arrayify(imagehashid)
+        ethers.utils.arrayify(imageHash)
       );
       setSignature(signature);
     } catch (error) {
@@ -84,6 +87,46 @@ const ImageDrop = () => {
 
   const openFileDialog = () => {
     document.getElementById("fileInput").click();
+  };
+
+  const progressCallback = (progressData) => {
+    let percentageDone =
+      100 - (progressData?.total / progressData?.uploaded)?.toFixed(2);
+    console.log(`Upload Progress: ${percentageDone}%`);
+  };
+  const [cid, setCid] = useState("");
+
+  const uploadToLighthouse = async (file) => {
+    try {
+      const output = await lighthouse.upload(
+        file,
+        "8c94e5c8.a23394e4c97643ed8d6fae6ead3dbfb8",
+        true,
+        null,
+        progressCallback
+      );
+      console.log("File Status:", output);
+      setUploadStatus(
+        `File uploaded successfully. Visit at https://gateway.lighthouse.storage/ipfs/${output.data.Hash}`
+      );
+      setCid(output.data.Hash);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setUploadStatus("Error uploading file.");
+    }
+  };
+  useEffect(() => {
+    if (cid) {
+      console.log("CID:", cid);
+    }
+  }, [cid]);
+
+
+  const registerImage = async (cid, hash, signature) => {
+    console.log("Registering Image");
+    console.log("CID:", cid);
+    console.log("Hash:", hash);
+    console.log("Signature:", signature);
   };
 
   return (
@@ -156,6 +199,25 @@ const ImageDrop = () => {
             />
           </div>
         </div>
+      )}
+
+      {uploadStatus && (
+        <div className="bg-gray-100 p-4 rounded-md w-64 text-center">
+          <p className="text-sm text-gray-600">{uploadStatus}</p>
+        </div>
+      )}
+      {cid && (
+        <div className="bg-gray-100 p-4 rounded-md w-64 text-center">
+          <p className="text-sm text-gray-600">{cid}</p>
+        </div>
+      )}
+      {signature && cid && imageHash && (
+        <button
+          onClick={() => registerImage(cid, imageHash, signature)}
+          className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Register Image
+        </button>
       )}
     </div>
   );
