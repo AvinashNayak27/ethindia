@@ -15,7 +15,7 @@ import { createClient, Provider } from 'urql';
 
 // URQL Client
 const client = createClient({
-  url: 'https://api.studio.thegraph.com/query/59475/authentichain/version/latest'
+  url: 'https://api.studio.thegraph.com/query/59475/authenichainscroll/version/latest'
 });
 
 ReactDOM.createRoot(document.getElementById('root')).render(

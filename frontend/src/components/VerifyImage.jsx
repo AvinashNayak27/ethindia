@@ -81,7 +81,7 @@ export default function Component() {
       processFile(file);
     }
   };
-  const imageRegistryAddress = "0x472f764c9ef423DD836efF1C7dF467B39f666095";
+  const imageRegistryAddress = "0x2d6156F69383fb29E27908b29047E3Cdbc76c97c";
   const [registrarInfo, setRegistrarInfo] = useState(null);
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);

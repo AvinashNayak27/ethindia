@@ -53,7 +53,7 @@ const ImageDrop = () => {
     return "0x" + hash;
   };
 
-  const baseGoerliChainId = "0x14a33"; // Chain ID for baseGoerli is 5
+  const scrollSepoliaChainId = "0x8274f"; // Chain ID for scrollSepolia is 5
 
   const connectWallet = async () => {
     if (window.ethereum) {
@@ -61,18 +61,18 @@ const ImageDrop = () => {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const network = await provider.getNetwork();
 
-        if (network.chainId.toString() !== baseGoerliChainId) {
+        if (network.chainId.toString() !== scrollSepoliaChainId) {
           try {
             await window.ethereum.request({
               method: "wallet_switchEthereumChain",
-              params: [{ chainId: baseGoerliChainId }],
+              params: [{ chainId: scrollSepoliaChainId }],
             });
           } catch (switchError) {
             console.error(
-              "Error switching to baseGoerli network:",
+              "Error switching to scrollSepolia network:",
               switchError
             );
-            setErrorMessage("Error switching to baseGoerli network.");
+            setErrorMessage("Error switching to scrollSepolia network.");
           }
         }
 
@@ -162,7 +162,7 @@ const ImageDrop = () => {
       return;
     }
 
-    const imageRegistryAddress = "0x472f764c9ef423DD836efF1C7dF467B39f666095";
+    const imageRegistryAddress = "0x2d6156F69383fb29E27908b29047E3Cdbc76c97c";
     console.log("CID:", cid);
     console.log("Hash:", hash);
     console.log("Signature:", signature);
