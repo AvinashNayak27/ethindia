@@ -3,7 +3,7 @@ import CryptoJS from "crypto-js";
 import { abi } from "../../../contracts/artifacts/imageRegistrary.sol/ImageRegistry.json";
 import { ethers } from "ethers";
 import { useDomainData, useSocialData } from "./Airstack"; // Adjust the import path as needed
-
+import { Header } from "../App";
 export function RegistrarInfo({ address }) {
   const {
     domainName,
@@ -124,66 +124,59 @@ export default function Component() {
       setErrorMessage("No file selected or file processing not completed.");
     }
   };
-  const {
-    domainName,
-    loading: domainLoading,
-    error: domainError,
-  } = useDomainData(registrarInfo);
-  const {
-    profileName,
-    loading: socialLoading,
-    error: socialError,
-  } = useSocialData(registrarInfo);
-
   return (
-    <div key="1" className="w-full max-w-2xl mx-auto p-8">
-      <div className="rounded-lg overflow-hidden shadow-lg">
-        <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4">
-          <h1 className="text-lg font-semibold">Content Authenticity System</h1>
+    <div >
+          <h1 className="text-3xl font-bold underline mb-4">
+            AuthentiChain
+          </h1>
+          <div className="App-header mb-4">
+          <Header />
+          </div>
+      <div className="rounded-lg overflow-hidden shadow-lg bg-white dark:bg-gray-900">
+        <div className="bg-indigo-600 dark:bg-indigo-700 px-6 py-4">
+          <h1 className="text-lg font-semibold text-white">Content Authenticity System</h1>
         </div>
+
         <div className="px-6 py-4">
           <div className="grid gap-4">
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full overflow-hidden bg-gray-300">
-                <img alt="@user" src="/placeholder-avatar.jpg" />
+            <div className="flex flex-col md:flex-row items-center gap-3">
+              <div className="flex-grow">
+                <label
+                  htmlFor="upload"
+                  className="cursor-pointer bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded inline-block"
+                >
+                  Select File
+                </label>
+                <input
+                  className="hidden"
+                  id="upload"
+                  type="file"
+                  onChange={handleFileChange}
+                />
+                <button
+                  onClick={verifyImage}
+                  className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded ml-4"
+                >
+                  Verify Image
+                </button>
               </div>
-              <div className="grid gap-0.5 text-xs">
-                <div className="font-medium">User Name</div>
-                <div className="text-gray-500 dark:text-gray-400">
-                  user@example.com
-                </div>
-              </div>
-              <label
-                htmlFor="upload"
-                className="ml-auto cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Select File
-              </label>
-              <input
-                className="hidden"
-                id="upload"
-                type="file"
-                onChange={handleFileChange}
-              />
-              <button
-                onClick={verifyImage}
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-4"
-              >
-                Verify Image
-              </button>
             </div>
-            {errorMessage && <div className="text-red-500">{errorMessage}</div>}
+            {errorMessage && <div className="text-red-600 mt-2">{errorMessage}</div>}
             {successMessage && (
-              <div className="text-green-500">{successMessage}</div>
+              <div >
+              <div className="text-green-600 mt-2">{successMessage}</div>
+              <div className="text-green-600 mt-2">
+              {registrarInfo && <RegistrarInfo address={registrarInfo} />}
+              </div>
+              </div>
             )}
-            {isLoading && <div>Loading...</div>}
-            {image && <img src={image} alt="Uploaded" className="mt-4" />}
-            {imageHash && <div>Image Hash: {imageHash}</div>}
-            {registrarInfo && <RegistrarInfo address={registrarInfo} />}
-
+            {isLoading && <div className="mt-2 text-gray-600">Loading...</div>}
+            {image && <img src={image} alt="Uploaded" className="w-96 h-96 object-contain mx-auto" />}
           </div>
         </div>
       </div>
     </div>
   );
+  
+
 }

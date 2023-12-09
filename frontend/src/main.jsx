@@ -25,7 +25,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <Router>
       <Routes>
         <Route path="/" element={<App />} />
-        <Route path="/verify" element={<Verify />} />
+        <Route path="verify" element={<Verify />} />
         <Route path='airstack' element={<MyComponent/>}/>
         <Route path='feed' element={<Feed/>}/>
       </Routes>
