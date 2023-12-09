@@ -41,7 +41,7 @@ const ImageDrop = () => {
     }
   };
 
-  const computeHash = (dataUrl) => {
+   const computeHash = (dataUrl) => {
     const base64 = dataUrl.split(",")[1];
     const wordArray = CryptoJS.enc.Base64.parse(base64);
     const hash = CryptoJS.SHA256(wordArray).toString(CryptoJS.enc.Hex);
