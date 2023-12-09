@@ -18,7 +18,7 @@ const ImageDrop = () => {
   const onDrop = useCallback((event) => {
     event.preventDefault();
     const files = event.dataTransfer.files;
-    processFile(files[0]);
+    processFile(files);
   }, []);
 
   const onDragOver = (event) => {
@@ -28,16 +28,17 @@ const ImageDrop = () => {
   const processFile = (file) => {
     setSuccessMessage("");
     setErrorMessage("");
-    if (file && file.type.startsWith("image/")) {
-      setImageName(file.name);
+    if (file) {
+      setImageName(file[0].name);
       const reader = new FileReader();
       reader.onload = async (e) => {
         setImage(e.target.result);
         const hash = computeHash(e.target.result);
         setImageHash(hash);
-        uploadToLighthouse(file); // Upload to Lighthouse
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file[0]);
+      console.log("File:", file[0]);
+      uploadToLighthouse(file); // Upload to Lighthouse
     }
   };
 
@@ -100,7 +101,7 @@ const ImageDrop = () => {
 
   const onFileChange = (event) => {
     const files = event.target.files;
-    processFile(files[0]);
+    processFile(files);
   };
 
   const openFileDialog = () => {
@@ -117,7 +118,7 @@ const ImageDrop = () => {
       const output = await lighthouse.upload(
         file,
         "8c94e5c8.a23394e4c97643ed8d6fae6ead3dbfb8",
-        true,
+        false,
         null,
         progressCallback
       );
@@ -145,7 +146,7 @@ const ImageDrop = () => {
       return;
     }
 
-    const imageRegistryAddress = "0xCC69a36c79fe279af20bF1e3149b61B3967b9eb5";
+    const imageRegistryAddress = "0x472f764c9ef423DD836efF1C7dF467B39f666095";
     console.log("CID:", cid);
     console.log("Hash:", hash);
     console.log("Signature:", signature);

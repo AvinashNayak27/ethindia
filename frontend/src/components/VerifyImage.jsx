@@ -4,7 +4,7 @@ import { abi } from "../../../contracts/artifacts/imageRegistrary.sol/ImageRegis
 import { ethers } from "ethers";
 import { useDomainData, useSocialData } from "./Airstack"; // Adjust the import path as needed
 
-function RegistrarInfo({ address }) {
+export function RegistrarInfo({ address }) {
   const {
     domainName,
     loading: domainLoading,
@@ -81,7 +81,7 @@ export default function Component() {
       processFile(file);
     }
   };
-  const imageRegistryAddress = "0xCC69a36c79fe279af20bF1e3149b61B3967b9eb5";
+  const imageRegistryAddress = "0x472f764c9ef423DD836efF1C7dF467B39f666095";
   const [registrarInfo, setRegistrarInfo] = useState(null);
 
   const provider = new ethers.providers.Web3Provider(window.ethereum);
