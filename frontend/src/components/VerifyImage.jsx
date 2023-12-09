@@ -2,6 +2,37 @@ import React, { useState, useEffect } from "react";
 import CryptoJS from "crypto-js";
 import { abi } from "../../../contracts/artifacts/imageRegistrary.sol/ImageRegistry.json";
 import { ethers } from "ethers";
+import { useDomainData, useSocialData } from "./Airstack"; // Adjust the import path as needed
+
+function RegistrarInfo({ address }) {
+  const {
+    domainName,
+    loading: domainLoading,
+    error: domainError,
+  } = useDomainData(address);
+
+  const {
+    profileName,
+    loading: socialLoading,
+    error: socialError,
+  } = useSocialData(address);
+
+  if (domainLoading || socialLoading) return <div>Loading...</div>;
+
+  return (
+    <div>
+      {domainError ? <div>Error: {domainError.message}</div> : domainName && <div>Domain: {domainName}</div>}
+      {socialError ? <div>Error: {socialError.message}</div> : profileName && (
+        <div>
+          Social Profiles:
+          {profileName.map((name, index) => <div key={index}>{name}</div>)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 export default function Component() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -75,11 +106,14 @@ export default function Component() {
     }
   }, [imageHash]);
 
-  const verifyImage = () => {
+  const verifyImage = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+
     if (imageHash) {
       if (imageHash) {
         if (registrarInfo === "0x0000000000000000000000000000000000000000") {
           setSuccessMessage("Image is not registered.");
+          setRegistrarInfo(null)
         } else if (registrarInfo) {
           setSuccessMessage("Image is already registered. by " + registrarInfo);
         }
@@ -90,6 +124,16 @@ export default function Component() {
       setErrorMessage("No file selected or file processing not completed.");
     }
   };
+  const {
+    domainName,
+    loading: domainLoading,
+    error: domainError,
+  } = useDomainData(registrarInfo);
+  const {
+    profileName,
+    loading: socialLoading,
+    error: socialError,
+  } = useSocialData(registrarInfo);
 
   return (
     <div key="1" className="w-full max-w-2xl mx-auto p-8">
@@ -135,6 +179,8 @@ export default function Component() {
             {isLoading && <div>Loading...</div>}
             {image && <img src={image} alt="Uploaded" className="mt-4" />}
             {imageHash && <div>Image Hash: {imageHash}</div>}
+            {registrarInfo && <RegistrarInfo address={registrarInfo} />}
+
           </div>
         </div>
       </div>
