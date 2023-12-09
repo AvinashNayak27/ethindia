@@ -58,6 +58,7 @@ contract ImageRegistry {
     function registerImage(bytes32 imageHash, string memory ipfsHash, bytes memory signature) public {
         // Verify that the sender is the signer
         require(verify(msg.sender, imageHash, signature), "Signature verification failed");
+        require(imageRegistry[imageHash].registrar == address(0), "Image already registered");
 
         // Register the image
         imageRegistry[imageHash] = ImageData(ipfsHash, msg.sender);

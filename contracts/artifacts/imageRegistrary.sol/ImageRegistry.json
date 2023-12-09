@@ -31,17 +31,21 @@
           "internalType": "bytes32",
           "name": "imageHash",
           "type": "bytes32"
-        }
-      ],
-      "name": "getIPFSHash",
-      "outputs": [
+        },
         {
           "internalType": "string",
-          "name": "",
+          "name": "ipfsHash",
           "type": "string"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
         }
       ],
-      "stateMutability": "view",
+      "name": "registerImage",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -69,6 +73,25 @@
           "internalType": "bytes32",
           "name": "imageHash",
           "type": "bytes32"
+        }
+      ],
+      "name": "getIPFSHash",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "imageHash",
+          "type": "bytes32"
         },
         {
           "internalType": "bytes",
@@ -85,29 +108,6 @@
         }
       ],
       "stateMutability": "pure",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "imageHash",
-          "type": "bytes32"
-        },
-        {
-          "internalType": "string",
-          "name": "ipfsHash",
-          "type": "string"
-        },
-        {
-          "internalType": "bytes",
-          "name": "signature",
-          "type": "bytes"
-        }
-      ],
-      "name": "registerImage",
-      "outputs": [],
-      "stateMutability": "nonpayable",
       "type": "function"
     },
     {

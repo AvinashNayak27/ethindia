@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { ethers } from "ethers";
 import CryptoJS from "crypto-js";
 import lighthouse from "@lighthouse-web3/sdk";
+import { abi } from "../../../contracts/artifacts/imageRegistrary.sol/ImageRegistry.json";
 
 const ImageDrop = () => {
   const [image, setImage] = useState(null);
@@ -10,6 +11,9 @@ const ImageDrop = () => {
   const [signature, setSignature] = useState("");
   const [account, setAccount] = useState("");
   const [uploadStatus, setUploadStatus] = useState("");
+  const [cid, setCid] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const onDrop = useCallback((event) => {
     event.preventDefault();
@@ -22,6 +26,8 @@ const ImageDrop = () => {
   };
 
   const processFile = (file) => {
+    setSuccessMessage("");
+    setErrorMessage("");
     if (file && file.type.startsWith("image/")) {
       setImageName(file.name);
       const reader = new FileReader();
@@ -29,7 +35,6 @@ const ImageDrop = () => {
         setImage(e.target.result);
         const hash = computeHash(e.target.result);
         setImageHash(hash);
-        console.log("file:", file);
         uploadToLighthouse(file); // Upload to Lighthouse
       };
       reader.readAsDataURL(file);
@@ -43,40 +48,53 @@ const ImageDrop = () => {
     return "0x" + hash;
   };
 
+  const goerliChainId = "0x5"; // Chain ID for Goerli is 5
+
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const network = await provider.getNetwork();
+
+        if (network.chainId.toString() !== goerliChainId) {
+          try {
+            await window.ethereum.request({
+              method: "wallet_switchEthereumChain",
+              params: [{ chainId: goerliChainId }],
+            });
+          } catch (switchError) {
+            console.error("Error switching to Goerli network:", switchError);
+            setErrorMessage("Error switching to Goerli network.");
+          }
+        }
+
         const accounts = await window.ethereum.request({
           method: "eth_requestAccounts",
         });
         setAccount(accounts[0]);
       } catch (error) {
         console.error("Error connecting to MetaMask:", error);
+        setErrorMessage("Error connecting to MetaMask.");
       }
     } else {
-      alert(
-        "MetaMask is not installed. Please install it to use this feature."
-      );
+      setErrorMessage("MetaMask is not installed. Please install it to use this feature.");
     }
   };
 
   const signImage = async () => {
     if (!window.ethereum) {
-      alert(
-        "MetaMask is not installed. Please install it to use this feature."
-      );
+      setErrorMessage("MetaMask is not installed. Please install it to use this feature.");
       return;
     }
 
     try {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-      const signature = await signer.signMessage(
-        ethers.utils.arrayify(imageHash)
-      );
+      const signature = await signer.signMessage(ethers.utils.arrayify(imageHash));
       setSignature(signature);
     } catch (error) {
       console.error("Error signing the image:", error);
+      setErrorMessage("Error signing the image.");
     }
   };
 
@@ -90,11 +108,9 @@ const ImageDrop = () => {
   };
 
   const progressCallback = (progressData) => {
-    let percentageDone =
-      100 - (progressData?.total / progressData?.uploaded)?.toFixed(2);
+    let percentageDone = 100 - (progressData?.total / progressData?.uploaded)?.toFixed(2);
     console.log(`Upload Progress: ${percentageDone}%`);
   };
-  const [cid, setCid] = useState("");
 
   const uploadToLighthouse = async (file) => {
     try {
@@ -110,23 +126,44 @@ const ImageDrop = () => {
         `File uploaded successfully. Visit at https://gateway.lighthouse.storage/ipfs/${output.data.Hash}`
       );
       setCid(output.data.Hash);
+      setSuccessMessage(`File uploaded successfully. CID: ${output.data.Hash}`);
     } catch (error) {
       console.error("Error uploading file:", error);
-      setUploadStatus("Error uploading file.");
+      setErrorMessage("Error uploading file.");
     }
   };
+
   useEffect(() => {
     if (cid) {
       console.log("CID:", cid);
     }
   }, [cid]);
 
-
   const registerImage = async (cid, hash, signature) => {
-    console.log("Registering Image");
-    console.log("CID:", cid);
-    console.log("Hash:", hash);
-    console.log("Signature:", signature);
+    if (!window.ethereum) {
+      setErrorMessage("MetaMask is not installed. Please install it to use this feature.");
+      return;
+    }
+
+    const imageRegistryAddress = "0x9a2D6535607D5e975b30711cbb68966EB181f9A2";
+
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const imageRegistryContract = new ethers.Contract(
+        imageRegistryAddress,
+        abi,
+        signer
+      );
+
+      const tx = await imageRegistryContract.registerImage(hash, cid, signature);
+      await tx.wait();
+
+      setSuccessMessage("Image registered successfully.");
+    } catch (error) {
+      console.error("Error registering the image:", error);
+      setErrorMessage("Error registering the image."+error.reason);
+    }
   };
 
   return (
@@ -218,6 +255,18 @@ const ImageDrop = () => {
         >
           Register Image
         </button>
+      )}
+
+      {successMessage && (
+        <div className="p-4 mb-4 text-green-700 bg-green-100 rounded-md">
+          {successMessage}
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="p-4 mb-4 text-red-700 bg-red-100 rounded-md">
+          {errorMessage}
+        </div>
       )}
     </div>
   );
