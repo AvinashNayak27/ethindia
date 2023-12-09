@@ -41,14 +41,14 @@ const ImageDrop = () => {
     }
   };
 
-   const computeHash = (dataUrl) => {
+  const computeHash = (dataUrl) => {
     const base64 = dataUrl.split(",")[1];
     const wordArray = CryptoJS.enc.Base64.parse(base64);
     const hash = CryptoJS.SHA256(wordArray).toString(CryptoJS.enc.Hex);
     return "0x" + hash;
   };
 
-  const goerliChainId = "0x5"; // Chain ID for Goerli is 5
+  const baseGoerliChainId = "0x14a33"; // Chain ID for baseGoerli is 5
 
   const connectWallet = async () => {
     if (window.ethereum) {
@@ -56,15 +56,15 @@ const ImageDrop = () => {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const network = await provider.getNetwork();
 
-        if (network.chainId.toString() !== goerliChainId) {
+        if (network.chainId.toString() !== baseGoerliChainId) {
           try {
             await window.ethereum.request({
               method: "wallet_switchEthereumChain",
-              params: [{ chainId: goerliChainId }],
+              params: [{ chainId: baseGoerliChainId }],
             });
           } catch (switchError) {
-            console.error("Error switching to Goerli network:", switchError);
-            setErrorMessage("Error switching to Goerli network.");
+            console.error("Error switching to baseGoerli network:", switchError);
+            setErrorMessage("Error switching to baseGoerli network.");
           }
         }
 
@@ -145,10 +145,14 @@ const ImageDrop = () => {
       return;
     }
 
-    const imageRegistryAddress = "0x9a2D6535607D5e975b30711cbb68966EB181f9A2";
+    const imageRegistryAddress = "0xCC69a36c79fe279af20bF1e3149b61B3967b9eb5";
+    console.log("CID:", cid);
+    console.log("Hash:", hash);
+    console.log("Signature:", signature);
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+
       const signer = provider.getSigner();
       const imageRegistryContract = new ethers.Contract(
         imageRegistryAddress,
@@ -162,7 +166,7 @@ const ImageDrop = () => {
       setSuccessMessage("Image registered successfully.");
     } catch (error) {
       console.error("Error registering the image:", error);
-      setErrorMessage("Error registering the image."+error.reason);
+      setErrorMessage("Error registering the image." + error.reason);
     }
   };
 
@@ -255,6 +259,7 @@ const ImageDrop = () => {
         >
           Register Image
         </button>
+
       )}
 
       {successMessage && (
